@@ -76,9 +76,9 @@ def parse_elem_7_7R(text, element_num):
         tag2 = ''   # each page should only have one tag2
                     # some tag2s are shared over multiple pages
                     # each page has its Key Topic listed
-        
+        #pp.pprint(page)    
         for line in page:
-        
+            print(line)
             if re.search(r'Key Topic #[0-9]{1,3}: ', line, re.IGNORECASE):
                 #print(line)
                 line = line.replace('  ', ' ').replace('-', '').replace(':', '').replace(',', '')
@@ -93,11 +93,13 @@ def parse_elem_7_7R(text, element_num):
                 pass
 
             # parse bottom of page Answer Keys into list of question numbers and answers
-            elif re.match(r'^Answers', line) is not None:
-                print(line)
-                remove_list = ['Answers', ':', '-', '–'] #Answer keys can use 2 types of hyphens     
+            elif re.match(r'^Answ', line) is not None:
+#                print(line)
+                #Answer keys can use 2 types of hyphens     
+                # 'Answers' can have random spaces included from poor pdf parsing, messy regex below accounts for that
+                remove_list = ['Answ', 'e', 'r', 's', ':', '-', '–'] 
                 for remove in remove_list:
-                    line = line.replace(remove, '')
+                    line = line.replace(remove, '').replace('100J 3', '100J3')
                
                 # split line then remove empty items
                 line = line.split(' ')
@@ -105,7 +107,7 @@ def parse_elem_7_7R(text, element_num):
                     
                 # create keys and partial list of values containing Answers and Tags
                 for i in range(0, len(line), 2):
-                    print(line)
+#                    print(line)
                     question_num = re.findall(r'[0-9]{1,3}[A-Z][1-6]', line[i])[0]
                     whole_question_num = element_num + '-' + question_num
 
@@ -114,10 +116,11 @@ def parse_elem_7_7R(text, element_num):
                                                     ' Element_' + element_num + ' ' + tag2]
             
             else:
-                questions_rough.append(line)
-    
+                questions_rough.append(line.replace('100J 3', '100J3').replace('100J 4', '100J4'))
+
     questions_separated = separate_questions(questions_rough)
     
+#    pp.pprint(questions_separated) 
     for question in questions_separated:
         question_temp = []    
         for i in range(len(question)):
@@ -136,7 +139,7 @@ def parse_elem_7_7R(text, element_num):
 
         questions_cleaned.append(question_temp)
 
-
+#    pp.pprint(cards)
     for question in questions_cleaned:
         # split question number and question
         question[0] = question[0].split(' ', 1)
@@ -163,7 +166,7 @@ def parse_elem_7_7R(text, element_num):
 
         cards[question[0][0]][0] = question_complete
 
-    pp.pprint(cards)
+#    pp.pprint(cards)
     write_cards_to_file(cards, element_num)
 
 
